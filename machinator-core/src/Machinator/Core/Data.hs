@@ -1,16 +1,28 @@
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Machinator.Core.Data (
   -- * Versioning
     MachinatorVersion (..)
+  , versionToNumber
+  , versionFromNumber
   , MachinatorFeature (..)
   , versionFeatures
   , featureEnabled
   , featureGuard
-  -- * Datatypes
+  , Versioned (..)
+  -- * Serialisation
+  , DefinitionFile (..)
+  , Definition (..)
+  -- * Datatype types
   , Name (..)
   , Type (..)
+  , Ground (..)
+  , groundToName
+  , groundFromName
   , DataType (..)
   ) where
 
@@ -20,6 +32,8 @@ import           Data.Set  (Set)
 import qualified Data.Set as S
 
 import           P
+
+import           System.IO  (FilePath)
 
 
 -- | The version of machinator in use. This will be reflected in a
@@ -31,6 +45,21 @@ import           P
 data MachinatorVersion
   = MachinatorV1
   deriving (Eq, Ord, Enum, Show)
+
+versionToNumber :: Integral a => MachinatorVersion -> a
+versionToNumber v =
+  case v of
+    MachinatorV1 ->
+      1
+
+versionFromNumber :: (Alternative f, Integral a) => a -> f MachinatorVersion
+versionFromNumber i =
+  case i of
+    1 ->
+      pure MachinatorV1
+    _ ->
+      empty
+
 
 -- | Features supported by Machinator at one time or another.
 --
@@ -62,6 +91,24 @@ featureGuard :: Alternative f => MachinatorVersion -> MachinatorFeature -> f ()
 featureGuard v =
   guard . featureEnabled v
 
+-- -----------------------------------------------------------------------------
+
+-- | Functor that attaches a MachinatorVersion.
+data Versioned a = Versioned MachinatorVersion a
+  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
+
+-- -----------------------------------------------------------------------------
+
+-- | A set of type definitions from a given file.
+data DefinitionFile
+  = DefinitionFile FilePath [Definition]
+  deriving (Eq, Ord, Show)
+
+-- | A single data definition.
+data Definition = Definition {
+     defName :: Name
+   , defType :: DataType
+   } deriving (Eq, Ord, Show)
 
 -- -----------------------------------------------------------------------------
 
@@ -80,6 +127,22 @@ data Type
 data Ground
   = StringT
   deriving (Eq, Ord, Show)
+
+-- | Obtain the stringy form for a ground type.
+groundToName :: Ground -> Name
+groundToName g =
+  case g of
+    StringT ->
+      Name "String"
+
+-- | Obtain the ground type for a stringy name.
+groundFromName :: Alternative f => Name -> f Ground
+groundFromName n =
+  case unName n of
+    "String" ->
+      pure StringT
+    _ ->
+      empty
 
 -- | Declarable datatypes, e.g. sums or records.
 data DataType
