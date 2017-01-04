@@ -4,7 +4,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Machinator.Core.Data (
+module Machinator.Core.Data.Definition (
   -- * Serialisation
     DefinitionFile (..)
   , Definition (..)

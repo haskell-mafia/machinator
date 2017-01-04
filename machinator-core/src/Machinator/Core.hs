@@ -10,7 +10,7 @@ module Machinator.Core (
   ) where
 
 
-import           Machinator.Core.Data
+import           Machinator.Core.Data.Definition (DefinitionFile (..), Definition (..))
 import           Machinator.Core.Data.Version (MachinatorVersion (..), Versioned (..))
 import qualified Machinator.Core.Lexer as Lexer
 import qualified Machinator.Core.Parser as Parser
