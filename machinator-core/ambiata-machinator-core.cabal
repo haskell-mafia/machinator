@@ -1,5 +1,5 @@
 name:                  ambiata-machinator-core
-version:               0.0.1
+version:               1.0.0
 license:               AllRightsReserved
 author:                Ambiata <info@ambiata.com>
 maintainer:            Ambiata <info@ambiata.com>
@@ -15,6 +15,8 @@ library
                        base                            >= 3          && < 5
                      , ambiata-p
                      , ambiata-x-eithert
+                     , containers                      == 0.5.*
+                     , semigroups                      == 0.18.*
                      , transformers                    >= 0.4        && < 0.6
 
   ghc-options:
@@ -25,7 +27,9 @@ library
 
   exposed-modules:
                        Paths_ambiata_machinator_core
+
                        Machinator.Core
+                       Machinator.Core.Data
 
 test-suite test
   type:                exitcode-stdio-1.0
