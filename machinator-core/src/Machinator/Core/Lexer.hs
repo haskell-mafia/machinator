@@ -9,9 +9,9 @@ module Machinator.Core.Lexer (
 
 import qualified Data.Text as T
 
-import           Machinator.Core.Data (Versioned (..), MachinatorVersion (..), versionFromNumber)
 import           Machinator.Core.Data.Position
 import           Machinator.Core.Data.Token
+import           Machinator.Core.Data.Version
 
 import           P
 

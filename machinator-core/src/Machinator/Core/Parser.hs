@@ -17,6 +17,7 @@ import qualified Data.Text as T
 import           Machinator.Core.Data
 import           Machinator.Core.Data.Position
 import           Machinator.Core.Data.Token as MT
+import           Machinator.Core.Data.Version
 
 import           P
 

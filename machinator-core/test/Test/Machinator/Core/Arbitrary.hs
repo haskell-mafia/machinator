@@ -13,6 +13,7 @@ import           Disorder.Corpus
 import           Disorder.Jack
 
 import           Machinator.Core.Data
+import           Machinator.Core.Data.Version
 
 import           P
 
