@@ -15,9 +15,12 @@ library
                        base                            >= 3          && < 5
                      , ambiata-p
                      , ambiata-x-eithert
+                     , annotated-wl-pprint             == 0.7.*
                      , containers                      == 0.5.*
                      , semigroups                      == 0.18.*
+                     , text                            == 1.2.*
                      , transformers                    >= 0.4        && < 0.6
+                     , megaparsec                      == 5.1.*
 
   ghc-options:
                        -Wall
@@ -30,6 +33,11 @@ library
 
                        Machinator.Core
                        Machinator.Core.Data
+                       Machinator.Core.Data.Position
+                       Machinator.Core.Data.Token
+                       Machinator.Core.Lexer
+                       Machinator.Core.Parser
+                       Machinator.Core.Pretty
 
 test-suite test
   type:                exitcode-stdio-1.0
@@ -45,7 +53,10 @@ test-suite test
                        base                            >= 3          && < 5
                      , ambiata-disorder-core
                      , ambiata-disorder-corpus
+                     , ambiata-disorder-jack  
                      , ambiata-p
                      , ambiata-machinator-core
                      , QuickCheck                      >= 2.8.2      && < 2.9
                      , quickcheck-instances            == 0.3.*
+                     , semigroups
+                     , text
