@@ -10,7 +10,8 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as T
 
-import           Machinator.Core.Data
+import           Machinator.Core.Data.Definition
+import           Machinator.Core.Data.Version
 
 import           P
 

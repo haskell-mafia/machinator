@@ -12,7 +12,8 @@ import qualified Data.Text as T
 import           Disorder.Corpus
 import           Disorder.Jack
 
-import           Machinator.Core.Data
+import           Machinator.Core.Data.Definition
+import           Machinator.Core.Data.Version
 
 import           P
 

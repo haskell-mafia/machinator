@@ -32,9 +32,10 @@ library
                        Paths_ambiata_machinator_core
 
                        Machinator.Core
-                       Machinator.Core.Data
+                       Machinator.Core.Data.Definition
                        Machinator.Core.Data.Position
                        Machinator.Core.Data.Token
+                       Machinator.Core.Data.Version
                        Machinator.Core.Lexer
                        Machinator.Core.Parser
                        Machinator.Core.Pretty
