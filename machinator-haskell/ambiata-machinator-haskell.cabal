@@ -16,6 +16,12 @@ library
                      , ambiata-machinator-core
                      , ambiata-p
                      , ambiata-x-eithert
+                     , ambiata-x-templatehaskell
+                     , containers
+                     , semigroups                      == 0.18.*
+                     , template-haskell                == 2.10.*
+                     , text                            == 1.2.*
+                     , transformers                    >= 0.5        && < 0.7
 
   ghc-options:
                        -Wall
@@ -27,6 +33,8 @@ library
                        Paths_ambiata_machinator_haskell
 
                        Machinator.Haskell
+                       Machinator.Haskell.Data.Types
+                       Machinator.Haskell.Scheme.Types
 
 test-suite test
   type:                exitcode-stdio-1.0
