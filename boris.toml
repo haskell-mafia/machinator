@@ -4,8 +4,14 @@
 [build.dist-7-10-core]
   command = [["master", "build", "dist-7-10", "-C", "machinator-core"]]
 
+[build.dist-7-10-haskell]
+  command = [["master", "build", "dist-7-10", "-C", "machinator-haskell"]]
+
 [build.branches-7-10-core]
   command = [["master", "build", "branches-7-10", "-C", "machinator-core"]]
+
+[build.branches-7-10-haskell]
+  command = [["master", "build", "branches-7-10", "-C", "machinator-haskell"]]
 
 [build.dist-validate]
   command = [["validate-respect"]]
