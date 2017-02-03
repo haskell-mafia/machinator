@@ -2,6 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Machinator.Core (
     MachinatorVersion (..)
+  , MachinatorError (..)
+  , renderMachinatorError
   , Versioned (..)
   , DefinitionFile (..)
   , Definition (..)
@@ -25,6 +27,14 @@ data MachinatorError
   = MParseError Parser.ParseError
   | MLexError Lexer.LexError
   deriving (Eq, Ord, Show)
+
+renderMachinatorError :: MachinatorError -> Text
+renderMachinatorError me =
+  case me of
+    MParseError pe ->
+      "Parse error: " <> Parser.renderParseError pe
+    MLexError le ->
+      "Lexical error: " <> Lexer.renderLexError le
 
 
 -- | Lex and parse a definition file from a 'Text' value.
