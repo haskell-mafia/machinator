@@ -36,6 +36,7 @@ library
                        Machinator.Core.Data.Position
                        Machinator.Core.Data.Token
                        Machinator.Core.Data.Version
+                       Machinator.Core.Graph
                        Machinator.Core.Lexer
                        Machinator.Core.Parser
                        Machinator.Core.Pretty

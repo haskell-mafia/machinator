@@ -1,19 +1,26 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Machinator.Core (
+  -- * Versioning
     MachinatorVersion (..)
+  , Versioned (..)
+  -- * Errors
   , MachinatorError (..)
   , renderMachinatorError
-  , Versioned (..)
+  -- * Datatypes
   , DefinitionFile (..)
   , Definition (..)
+  , DefinitionFileGraph (..)
+  , buildFileGraph
+  -- * Syntax
   , parseDefinitionFile
   , Pretty.ppDefinitionFile
   ) where
 
 
-import           Machinator.Core.Data.Definition (DefinitionFile (..), Definition (..))
+import           Machinator.Core.Data.Definition (DefinitionFile (..), Definition (..), DefinitionFileGraph (..))
 import           Machinator.Core.Data.Version (MachinatorVersion (..), Versioned (..))
+import           Machinator.Core.Graph (buildFileGraph)
 import qualified Machinator.Core.Lexer as Lexer
 import qualified Machinator.Core.Parser as Parser
 import qualified Machinator.Core.Pretty as Pretty
