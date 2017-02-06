@@ -23,19 +23,19 @@ import           System.IO (FilePath)
 buildFileGraph :: [DefinitionFile] -> DefinitionFileGraph
 buildFileGraph fs =
   let
-    uses :: Map FilePath [Name]
-    uses =
+    binds :: Map FilePath [Name]
+    binds =
       M.fromList . with fs $ \(DefinitionFile fp defs) ->
         (fp, fmap defName defs)
 
-    binds :: Map FilePath (Set Name)
-    binds =
+    uses :: Map FilePath [Name]
+    uses =
       M.fromList . with fs $ \(DefinitionFile fp defs) ->
-        (fp, fold (fmap (free . defType) defs))
+        (fp, toList (fold (fmap (free . defType) defs)))
 
     inverted :: Map Name FilePath
     inverted =
-      M.foldMapWithKey (\k ns -> foldl' (\acc v -> M.insert v k acc) mempty ns) binds
+      M.foldMapWithKey (\k ns -> foldl' (\acc v -> M.insertWith (<>) v k acc) mempty ns) binds
 
     fg :: Map FilePath (Set FilePath)
     fg =
