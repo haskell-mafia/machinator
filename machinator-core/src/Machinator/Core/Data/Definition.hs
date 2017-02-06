@@ -8,6 +8,7 @@ module Machinator.Core.Data.Definition (
   -- * Serialisation
     DefinitionFile (..)
   , Definition (..)
+  , DefinitionFileGraph (..)
   -- * Datatype types
   , Name (..)
   , Type (..)
@@ -15,10 +16,15 @@ module Machinator.Core.Data.Definition (
   , groundToName
   , groundFromName
   , DataType (..)
+  -- * Traversals etc
+  , free
   ) where
 
 
-import           Data.List.NonEmpty  (NonEmpty(..))
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Map.Strict (Map)
+import           Data.Set (Set)
+import qualified Data.Set as S
 
 import           P
 
@@ -35,6 +41,13 @@ data Definition = Definition {
      defName :: Name
    , defType :: DataType
    } deriving (Eq, Ord, Show)
+
+-- | The module graph.
+-- Maps each file to the other files it depends on.
+newtype DefinitionFileGraph = DefinitionFileGraph {
+    unDefinitionFileGraph :: Map FilePath (Set FilePath)
+  } deriving (Eq, Ord, Show, Monoid)
+
 
 -- -----------------------------------------------------------------------------
 
@@ -74,3 +87,17 @@ groundFromName n =
 data DataType
   = Variant (NonEmpty (Name, [Type]))
   deriving (Eq, Ord, Show)
+
+-- -----------------------------------------------------------------------------
+
+free :: DataType -> Set Name
+free d =
+  case d of
+    Variant nts ->
+      fold . with nts $ \(_, ts) ->
+        S.fromList . catMaybes . with ts $ \t ->
+          case t of
+            Variable n ->
+              pure n
+            GroundT _ ->
+              empty

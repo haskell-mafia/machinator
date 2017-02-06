@@ -35,7 +35,7 @@ genDefinitionV1 n =
 genVariantV1 :: Int -> Jack DataType
 genVariantV1 k =
   (Variant . NE.fromList)
-    <$> (listOfN 1 k $ do
+    <$> (listOfN 1 (k+1) $ do
           n <- genName
           ts <- listOfN 0 10 genTypeV1
           pure (n, ts))

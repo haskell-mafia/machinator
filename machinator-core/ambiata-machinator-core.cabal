@@ -36,6 +36,7 @@ library
                        Machinator.Core.Data.Position
                        Machinator.Core.Data.Token
                        Machinator.Core.Data.Version
+                       Machinator.Core.Graph
                        Machinator.Core.Lexer
                        Machinator.Core.Parser
                        Machinator.Core.Pretty
@@ -57,6 +58,7 @@ test-suite test
                      , ambiata-disorder-jack  
                      , ambiata-p
                      , ambiata-machinator-core
+                     , containers
                      , QuickCheck                      >= 2.8.2      && < 2.9
                      , quickcheck-instances            == 0.3.*
                      , semigroups
