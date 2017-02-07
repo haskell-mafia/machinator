@@ -42,9 +42,11 @@ genVariantV1 k =
 
 genTypeV1 :: Jack Type
 genTypeV1 =
-  oneOf [
+  oneOfRec [
       Variable <$> genName
     , GroundT <$> genGroundTypeV1
+    ] [
+      ListT <$> genTypeV1
     ]
 
 genGroundTypeV1 :: Jack Ground

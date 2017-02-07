@@ -120,15 +120,30 @@ alternative v = do
 
 types :: MachinatorVersion -> Parser Type
 types v = do
-  x <- ident
-  case groundFromName x of
-    Just t ->
-      case t of
-        StringT ->
-          hasFeature v HasStrings *> pure (GroundT t)
-    Nothing ->
-      pure (Variable x)
+  optionalParens (types' v)
 
+types' :: MachinatorVersion -> Parser Type
+types' v = do
+  x <- ident
+  case x of
+    Name "List" ->
+      hasFeature v HasLists *> (ListT <$> types v)
+    _ ->
+      case groundFromName x of
+        Just t ->
+          case t of
+            StringT ->
+              hasFeature v HasStrings *> pure (GroundT t)
+        Nothing ->
+          pure (Variable x)
+
+parens :: Parser a -> Parser a
+parens p =
+  M.between (M.try (token TLParen)) (token TRParen) p
+
+optionalParens :: Parser a -> Parser a
+optionalParens p =
+  M.try (parens p) <|> p
 
 -- -----------------------------------------------------------------------------
 

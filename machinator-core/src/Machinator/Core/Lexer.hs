@@ -69,6 +69,8 @@ token' =
       string "data" *> pure TData
     , string "=" *> pure TEquals
     , string "|" *> pure TChoice
+    , string "(" *> pure TLParen
+    , string ")" *> pure TRParen
     , ident
     ]
 

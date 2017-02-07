@@ -60,6 +60,7 @@ newtype Name = Name {
 data Type
   = Variable Name
   | GroundT Ground
+  | ListT Type
   deriving (Eq, Ord, Show)
 
 -- | Ground types, e.g. platform primitives.
@@ -95,9 +96,14 @@ free d =
   case d of
     Variant nts ->
       fold . with nts $ \(_, ts) ->
-        S.fromList . catMaybes . with ts $ \t ->
-          case t of
-            Variable n ->
-              pure n
-            GroundT _ ->
-              empty
+        S.fromList . catMaybes . with ts $ freeInType
+
+freeInType :: Type -> Maybe Name
+freeInType t =
+  case t of
+    Variable n ->
+      pure n
+    GroundT _ ->
+      empty
+    ListT lt ->
+      freeInType lt
