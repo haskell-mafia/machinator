@@ -5,6 +5,7 @@
 module Machinator.Haskell.Scheme.Types (
     types
   , typesV1
+  , ModuleName (..)
   ) where
 
 
@@ -28,6 +29,7 @@ import qualified System.FilePath.Posix as FilePath
 import           System.IO (FilePath)
 
 
+-- TODO this should be a stable interface
 types :: HaskellTypesVersion -> [DefinitionFile] -> Either HaskellTypesError [(FilePath, Text)]
 types v ds =
   case v of
@@ -59,6 +61,18 @@ renderModule mn@(ModuleName n) imports defs =
 renderImport :: ModuleName -> Text
 renderImport (ModuleName n) =
   "import " <> n
+
+renderTopLevelModule :: ModuleName -> [ModuleName] -> Text
+renderTopLevelModule (ModuleName mn) mns =
+  T.unlines [
+      T.unwords ["module", mn, "("]
+    , T.unlines $ case mns of
+       (ModuleName x:xs) ->
+         ("    module " <> x) : (with xs (\(ModuleName imp) -> "  , module " <> imp))
+       [] -> []
+    , "  ) where"
+    , T.unlines (with mns renderImport)
+    ]
 
 -- -----------------------------------------------------------------------------
 
