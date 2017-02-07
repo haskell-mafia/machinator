@@ -3,6 +3,7 @@
 module Machinator.Haskell.Data.Types (
     HaskellTypesVersion (..)
   , HaskellTypesError (..)
+  , renderHaskellTypesError
   ) where
 
 
@@ -16,3 +17,9 @@ data HaskellTypesVersion
 data HaskellTypesError
   = HaskellTypesError
   deriving (Eq, Ord, Show)
+
+renderHaskellTypesError :: HaskellTypesError -> Text
+renderHaskellTypesError he =
+  case he of
+    HaskellTypesError ->
+      "HaskellTypesError"

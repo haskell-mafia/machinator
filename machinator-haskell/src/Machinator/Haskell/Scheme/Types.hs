@@ -47,7 +47,7 @@ typesV1 dfs =
 -- Extremely shoddy codegen for v0 purposes
 renderModule :: ModuleName -> Map ModuleName (Set ModuleName) -> [Definition] -> Text
 renderModule mn@(ModuleName n) imports defs =
-  fold [
+  T.unlines [
       "{-# LANGUAGE NoImplicitPrelude #-}"
     , "{-# LANGUAGE OverloadedStrings #-}"
     , T.unwords ["module", n, "where"]
