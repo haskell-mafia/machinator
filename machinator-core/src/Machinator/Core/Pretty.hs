@@ -60,6 +60,8 @@ ppType t =
       ppName n
     GroundT g ->
       ppGroundType g
+    ListT lt ->
+      "(List " <+> ppType lt <+> ")"
 
 ppGroundType :: Ground -> Doc a
 ppGroundType =

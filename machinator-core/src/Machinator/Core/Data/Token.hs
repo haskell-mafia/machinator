@@ -13,4 +13,6 @@ data Token
   | TIdent Text
   | TEquals
   | TChoice
+  | TLParen
+  | TRParen
   deriving (Eq, Ord, Show)

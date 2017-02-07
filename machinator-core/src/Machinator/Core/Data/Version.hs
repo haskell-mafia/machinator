@@ -54,6 +54,7 @@ versionFromNumber i =
 data MachinatorFeature
   = HasStrings
   | HasVariants
+  | HasLists
   deriving (Eq, Ord, Enum, Show)
 
 -- | The set of features enabled for a given version.
@@ -64,6 +65,7 @@ versionFeatures mv =
       S.fromList [
           HasStrings
         , HasVariants
+        , HasLists
         ]
 
 -- | Returns true if the given feature is enabled for the given version.
