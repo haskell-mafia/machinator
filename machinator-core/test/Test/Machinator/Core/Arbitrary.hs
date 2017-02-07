@@ -22,20 +22,40 @@ import           Machinator.Core.Data.Version
 import           P
 
 
--- TODO this should probably branch on version at relevant points
+-- TODO this should probably branch on version at relevant points,
+-- instead of having separate implementations per version
+
+genDefinitionFilesV1 :: Jack [Versioned DefinitionFile]
+genDefinitionFilesV1 =
+  sized $ \n -> do
+    k <- chooseInt (1, 10)
+    fns <- genFreeNames k mempty
+    fmap (\(res,_,_) -> res) (foldM
+        (\(res, kt, kc) fn -> do
+          (defs, kt', kc') <- genDefinitionFileV1' (n `div` k) kt kc
+          pure (Versioned MachinatorV1 (DefinitionFile fn defs):res, kt', kc'))
+        (mempty, mempty, mempty)
+        (fmap (T.unpack . unName) (toList fns)))
+
 genDefinitionFileV1 :: Jack (Versioned DefinitionFile)
 genDefinitionFileV1 =
   sized $ \n ->
     fmap
       (Versioned MachinatorV1 . DefinitionFile "Test.Machinator.Core.Arbitrary") $ do
-        tns <- genFreeNames n mempty
-        fmap fst
-          (foldM
-            (\(res, kc) name -> do
-              (d, kc') <- genDefinitionV1' (n `div` 2) name tns kc
-              pure (d:res, kc'))
-            (mempty, mempty)
-            (toList tns))
+        (def, _, _) <- genDefinitionFileV1' n mempty mempty
+        pure def
+
+genDefinitionFileV1' :: Int -> Set Name -> Set Name -> Jack ([Definition], Set Name, Set Name)
+genDefinitionFileV1' n kts kcs = do
+  tns <- genFreeNames n kts
+  let kts' = kts <> tns
+  fmap (\(res, kc) -> (res, kts', kc))
+    (foldM
+      (\(res, kc) name -> do
+        (d, kc') <- genDefinitionV1' (n `div` 2) name kts' kc
+        pure (d:res, kc'))
+      (mempty, kcs)
+      (toList tns))
 
 genDefinitionV1' :: Int -> Name -> Set Name -> Set Name -> Jack (Definition, Set Name)
 genDefinitionV1' k n knownTypes knownCons = do

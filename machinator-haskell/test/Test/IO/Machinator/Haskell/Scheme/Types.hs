@@ -18,7 +18,7 @@ import qualified Machinator.Haskell.Scheme.Types as MH
 
 import           P
 
-import           System.Directory (createDirectoryIfMissing, makeAbsolute)
+import System.Directory
 import           System.Exit (ExitCode(..))
 import           System.FilePath.Posix ((</>), takeDirectory)
 import           System.IO (FilePath, IO)
@@ -30,22 +30,27 @@ import           Test.Machinator.Core.Arbitrary
 
 -- -----------------------------------------------------------------------------
 
-typesPropV1 :: Property
-typesPropV1 =
-  -- N.B. this is only testing one file right now
-  gamble genDefinitionFileV1 $ \(Versioned _ df) ->
+prop_typesV1 :: Property
+prop_typesV1 =
+  gamble genDefinitionFilesV1 $ \files ->
     either (\e -> counterexample (T.unpack (renderHaskellTypesError e)) (property False)) id $ do
-      fts <- MH.typesV1 [df]
-      pure (conjoin (fmap (uncurry ghcProp) fts))
+      fts <- MH.typesV1 (fmap (\(Versioned _ df) -> df) files)
+      pure . tmpDirProp $ \stem -> do
+        let filemap = fmap (first (stem </>)) fts
+        for_ filemap $ \(fp, txt) -> do
+          T.writeFile fp txt
+          createDirectoryIfMissing True (takeDirectory ("/tmp" </> fp))
+          T.writeFile ("/tmp" </> fp) txt
+        ghcProp (fmap fst filemap)
 
 -- -----------------------------------------------------------------------------
 
 -- Compiles with GHC in the current sandbox, failing if exit status is nonzero.
-ghcProp :: FilePath -> Text -> Property
-ghcProp mname modl =
-  fileProp mname modl
-    (\path -> readProcessWithExitCode "cabal" ["exec", "--", "ghc", path] "")
+ghcProp :: [FilePath] -> IO Property
+ghcProp path =
+  fmap
     (processProp (const (property True)))
+    (readProcessWithExitCode "cabal" (["exec", "--", "ghc"] <> path) "")
 
 -- -----------------------------------------------------------------------------
 
@@ -61,16 +66,9 @@ processProp f (code, out, err) =
             ]
       in counterexample errm (property False)
 
-
-fileProp :: FilePath -> Text -> (FilePath -> IO a) -> (a -> Property) -> Property
-fileProp mname modl f g =
-  testIO . withTempDirectory "./dist/" "gen-XXXXXX" $ \tmpDir -> do
-    let path = tmpDir </> mname
-        dir = takeDirectory path
-    createDirectoryIfMissing True dir
-    T.writeFile path modl
-    path' <- makeAbsolute path
-    fmap g (f path')
+tmpDirProp :: (FilePath -> IO Property) -> Property
+tmpDirProp f =
+  testIO (withTempDirectory "./dist/" "gen-XXXXXX" f)
 
 -- -----------------------------------------------------------------------------
 
