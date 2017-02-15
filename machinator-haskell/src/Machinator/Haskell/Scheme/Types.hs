@@ -50,6 +50,7 @@ renderModule mn@(ModuleName n) imports defs =
   T.unlines [
       "{-# LANGUAGE NoImplicitPrelude #-}"
     , "{-# LANGUAGE OverloadedStrings #-}"
+    , "{-# OPTIONS_GHC -fno-warn-unused-imports #-}"
     , T.unwords ["module", n, "where"]
     , "import Data.Text (Text)"
     , maybe mempty (T.unlines . fmap renderImport . toList) (M.lookup mn imports)
