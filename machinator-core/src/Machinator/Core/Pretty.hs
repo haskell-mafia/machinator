@@ -15,7 +15,7 @@ import           Machinator.Core.Data.Version
 
 import           P
 
-import           Text.PrettyPrint.Annotated.Leijen (Doc, (<+>), (<$$>))
+import           Text.PrettyPrint.Annotated.Leijen (Doc, (<+>))
 import qualified Text.PrettyPrint.Annotated.Leijen as WL
 
 
@@ -28,7 +28,7 @@ ppDefinitionFile (Versioned v df) =
 ppDefinitionFile' :: MachinatorVersion -> DefinitionFile -> Doc a
 ppDefinitionFile' v (DefinitionFile _ defs) =
        ppVersion v
-  <$$> cat (WL.punctuate (WL.linebreak WL.<> WL.linebreak) (fmap ppDefinition defs))
+  WL.<$$> cat (WL.punctuate (WL.linebreak WL.<> WL.linebreak) (fmap ppDefinition defs))
 
 ppVersion :: MachinatorVersion -> Doc a
 ppVersion v =
@@ -43,7 +43,7 @@ ppDefinition (Definition n ty) =
 ppVariant :: Name -> NonEmpty (Name, [Type]) -> Doc a
 ppVariant (Name n) cs =
   WL.hang 2
-    (text "data" <+> text n <$$> text "="
+    (text "data" <+> text n WL.<$$> text "="
       WL.<> (foldl'
               (<+>)
               WL.empty
