@@ -58,7 +58,7 @@ ppConstructor n ts =
 ppRecord :: Name -> [(Name, Type)] -> Doc a
 ppRecord n fts =
   WL.hang 2
-    (ppName n <+> text "{"
+    (text "data" <+> ppName n <+> text "=" <+> text "{"
       WL.<$$> foldl'
                 (<+>)
                 WL.empty
