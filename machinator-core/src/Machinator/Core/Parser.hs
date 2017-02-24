@@ -101,6 +101,7 @@ definition :: MachinatorVersion -> Parser Definition
 definition v =
   M.choice [
       variant v
+    , record v
     ]
 
 variant :: MachinatorVersion -> Parser Definition
@@ -117,6 +118,25 @@ alternative v = do
   name <- ident
   ts <- many (types v)
   pure (name, ts)
+
+record :: MachinatorVersion -> Parser Definition
+record v = do
+  hasFeature v HasRecords
+  token TData
+  x <- ident
+  token TEquals
+  token TLBrace
+  fts <- sepBy1 (recordField v) (token TComma)
+  token TRBrace
+  -- FIXME sepBy instead of sepBy1
+  pure (Definition x (Record (toList fts)))
+
+recordField :: MachinatorVersion -> Parser (Name, Type)
+recordField v = do
+  name <- ident
+  token TTypeSig
+  ty <- types v
+  pure (name, ty)
 
 types :: MachinatorVersion -> Parser Type
 types v = do

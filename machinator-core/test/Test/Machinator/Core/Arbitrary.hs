@@ -58,9 +58,13 @@ genDefinitionFileV1' n kts kcs = do
       (toList tns))
 
 genDefinitionV1' :: Int -> Name -> Set Name -> Set Name -> Jack (Definition, Set Name)
-genDefinitionV1' k n knownTypes knownCons = do
-  (v, cons) <- genVariantV1 k (S.insert n knownTypes) knownCons
-  pure (Definition n v, knownCons <> cons)
+genDefinitionV1' k n knownTypes knownCons =
+  oneOf [
+      do (v, cons) <- genVariantV1 k (S.insert n knownTypes) knownCons
+         pure (Definition n v, knownCons <> cons)
+    , do v <- genRecordV1 k (S.insert n knownTypes)
+         pure (Definition n v, knownCons)
+    ]
 
 genVariantV1 :: Int -> Set Name -> Set Name -> Jack (DataType, Set Name)
 genVariantV1 k knownTypes knownCons = do
@@ -68,6 +72,13 @@ genVariantV1 k knownTypes knownCons = do
   ns <- genFreeNames k' knownCons
   cts <- for (toList ns) $ \n -> fmap (n,) (listOfN 0 10 (genTypeV1 knownTypes))
   pure (Variant (NE.fromList cts), ns <> knownCons)
+
+genRecordV1 :: Int -> Set Name -> Jack DataType
+genRecordV1 k knownTypes = do
+  k' <- chooseInt (0, k)
+  fns <- listOfN 0 k' genFieldName
+  fts <- for fns $ \fn -> (fn,) <$> genTypeV1 knownTypes
+  pure (Record fts)
 
 genTypeV1 :: Set Name -> Jack Type
 genTypeV1 knownTypes =
@@ -97,3 +108,7 @@ genFreeNames k known =
     go j g s r = do
       e <- g `suchThat` (`S.notMember` s)
       go (j-1) g (S.insert e s) (S.insert e r)
+
+genFieldName :: Jack Name
+genFieldName =
+  fmap Name (elements boats)

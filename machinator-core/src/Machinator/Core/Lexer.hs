@@ -71,6 +71,10 @@ token' =
     , string "|" *> pure TChoice
     , string "(" *> pure TLParen
     , string ")" *> pure TRParen
+    , string "{" *> pure TLBrace
+    , string "}" *> pure TRBrace
+    , string ":" *> pure TTypeSig
+    , string "," *> pure TComma
     , ident
     ]
 

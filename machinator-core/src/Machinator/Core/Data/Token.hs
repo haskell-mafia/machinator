@@ -15,4 +15,8 @@ data Token
   | TChoice
   | TLParen
   | TRParen
+  | TLBrace
+  | TRBrace
+  | TComma
+  | TTypeSig
   deriving (Eq, Ord, Show)
