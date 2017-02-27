@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Machinator.Core.Pretty (
     ppDefinitionFile
+  , ppDefinition
   ) where
 
 
@@ -58,7 +59,7 @@ ppConstructor n ts =
 ppRecord :: Name -> [(Name, Type)] -> Doc a
 ppRecord n fts =
   WL.hang 2
-    (text "data" <+> ppName n <+> text "=" <+> text "{"
+    (text "data" <+> ppName n <+> text "=" <+> ppName n <+> text "{"
       WL.<$$> foldl'
                 (<+>)
                 WL.empty

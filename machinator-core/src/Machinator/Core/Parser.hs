@@ -88,7 +88,17 @@ data Foo = Bar String | Baz String
 
 data Bap = Bip Foo
 
-data Foo = Lip String Foo | Nil
+data Quux = Quux {
+    a : Foo
+  , b : Bap
+  , c : Quux
+  }
+
+data Quib = Quib {
+    a : Foo
+  , b : Bap
+  , c : Quib
+  }
 
 -}
 
@@ -99,10 +109,9 @@ parseVersioned file v = do
 
 definition :: MachinatorVersion -> Parser Definition
 definition v =
-  M.choice [
-      variant v
-    , record v
-    ]
+      M.try (record v)
+  <|> M.try (variant v)
+
 
 variant :: MachinatorVersion -> Parser Definition
 variant v = do
@@ -125,11 +134,11 @@ record v = do
   token TData
   x <- ident
   token TEquals
+  _y <- ident
   token TLBrace
-  fts <- sepBy1 (recordField v) (token TComma)
+  fts <- sepBy (recordField v) (token TComma)
   token TRBrace
-  -- FIXME sepBy instead of sepBy1
-  pure (Definition x (Record (toList fts)))
+  pure (Definition x (Record fts))
 
 recordField :: MachinatorVersion -> Parser (Name, Type)
 recordField v = do
@@ -171,10 +180,14 @@ hasFeature :: MachinatorVersion -> MachinatorFeature -> Parser ()
 hasFeature v f =
   if featureEnabled v f then pure () else parseError (FeatureGuard v f)
 
+sepBy :: Parser a -> Parser sep -> Parser [a]
+sepBy m sep =
+  M.try (fmap toList (sepBy1 m sep)) <|> pure []
+
 sepBy1 :: Parser a -> Parser sep -> Parser (NonEmpty a)
 sepBy1 m sep = do
   a <- m
-  bs <- many (sep *> m)
+  bs <- many (M.try sep *> m)
   pure (a :| bs)
 
 ident :: Parser Name
