@@ -111,4 +111,8 @@ genFree k gen known =
 
 genFieldName :: Jack Name
 genFieldName =
-  fmap Name (elements boats)
+  oneOf [
+      fmap Name (elements boats)
+    , fmap Name (elements waters)
+    , (Name . T.pack) <$> vectorOf 8 (arbitrary `suchThat` Char.isAsciiLower)
+    ]
