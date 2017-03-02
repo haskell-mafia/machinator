@@ -29,7 +29,7 @@ genDefinitionFilesV1 :: Jack [Versioned DefinitionFile]
 genDefinitionFilesV1 =
   sized $ \n -> do
     k <- chooseInt (1, 10)
-    fns <- genFreeNames k mempty
+    fns <- genFree k genName mempty
     fmap (\(res,_,_) -> res) (foldM
         (\(res, kt, kc) fn -> do
           (defs, kt', kc') <- genDefinitionFileV1' (n `div` k) kt kc
@@ -47,7 +47,7 @@ genDefinitionFileV1 =
 
 genDefinitionFileV1' :: Int -> Set Name -> Set Name -> Jack ([Definition], Set Name, Set Name)
 genDefinitionFileV1' n kts kcs = do
-  tns <- genFreeNames n kts
+  tns <- genFree n genName kts
   let kts' = kts <> tns
   fmap (\(res, kc) -> (res, kts', kc))
     (foldM
@@ -63,20 +63,20 @@ genDefinitionV1' k n knownTypes knownCons =
       do (v, cons) <- genVariantV1 k (S.insert n knownTypes) knownCons
          pure (Definition n v, knownCons <> cons)
     , do v <- genRecordV1 k (S.insert n knownTypes)
-         pure (Definition n v, knownCons)
+         pure (Definition n v, S.insert n knownCons)
     ]
 
 genVariantV1 :: Int -> Set Name -> Set Name -> Jack (DataType, Set Name)
 genVariantV1 k knownTypes knownCons = do
   k' <- chooseInt (1, k+1)
-  ns <- genFreeNames k' knownCons
+  ns <- genFree k' genName (knownTypes <> knownCons)
   cts <- for (toList ns) $ \n -> fmap (n,) (listOfN 0 10 (genTypeV1 knownTypes))
   pure (Variant (NE.fromList cts), ns <> knownCons)
 
 genRecordV1 :: Int -> Set Name -> Jack DataType
 genRecordV1 k knownTypes = do
   k' <- chooseInt (0, k)
-  fns <- listOfN 0 k' genFieldName
+  fns <- toList <$> genFree k' genFieldName mempty
   fts <- for fns $ \fn -> (fn,) <$> genTypeV1 knownTypes
   pure (Record fts)
 
@@ -100,9 +100,9 @@ genName =
     , T.pack <$> vectorOf 8 (arbitrary `suchThat` Char.isAsciiLower)
     ]
 
-genFreeNames :: Int -> Set Name -> Jack (Set Name)
-genFreeNames k known =
-  go k genName known mempty
+genFree :: Ord k => Int -> Jack k -> Set k -> Jack (Set k)
+genFree k gen known =
+  go k gen known mempty
   where
     go 0 _ _ r = pure r
     go j g s r = do
