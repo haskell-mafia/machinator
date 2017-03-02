@@ -88,13 +88,13 @@ data Foo = Bar String | Baz String
 
 data Bap = Bip Foo
 
-data Quux = Quux {
+record Quux = {
     a : Foo
   , b : Bap
   , c : Quux
   }
 
-data Quib = Quib {
+record Quib = {
     a : Foo
   , b : Bap
   , c : Quib
@@ -109,14 +109,14 @@ parseVersioned file v = do
 
 definition :: MachinatorVersion -> Parser Definition
 definition v =
-      M.try (record v)
-  <|> M.try (variant v)
+      record v
+  <|> variant v
 
 
 variant :: MachinatorVersion -> Parser Definition
 variant v = do
   hasFeature v HasVariants
-  token TData
+  M.try (token TData)
   x <- ident
   token TEquals
   cs <- sepBy1 (alternative v) (token TChoice)
@@ -131,10 +131,9 @@ alternative v = do
 record :: MachinatorVersion -> Parser Definition
 record v = do
   hasFeature v HasRecords
-  token TData
+  M.try (token TRecord)
   x <- ident
   token TEquals
-  _y <- ident
   token TLBrace
   fts <- sepBy (recordField v) (token TComma)
   token TRBrace

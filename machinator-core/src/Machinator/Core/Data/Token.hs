@@ -19,4 +19,5 @@ data Token
   | TRBrace
   | TComma
   | TTypeSig
+  | TRecord
   deriving (Eq, Ord, Show)

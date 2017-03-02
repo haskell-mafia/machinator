@@ -8,60 +8,66 @@ Machinator is a data description language in the spirit of
 [MaxML](https://github.com/mxswd/maxml/blob/master/Data/MaxML.hs).
 
 We want to specify very simple types that would be idiomatic in
-Haskell or Purescript. From this specification, we should get:
+Haskell or Purescript. From this specification, we should be able to derive:
 
 - Idiomatic types in Haskell and Purescript
 - A human-friendly JSON encoding
 - JSON encoders/decoders for Haskell and Purescript
 - Exhaustive generators (exhaustive in each shape)
 - Randomised generators (QuickCheck/Strongcheck style)
-- The ability to create other such backends
+- The ability to create other such schemes
 
 We also want a surface syntax, accessible to non-Haskellers, that can
 be published, versioned, and statically analysed. This is the main
 motivation to build a DSL, rather than embedding directly in Haskell.
-We have ways to write types and generic functions, but no nice way to
-treat them as data or to decouple them from a Haskell module.
 
-The [Projector](https://github.com/ambiata/projector) language will
-support the universe of Machinator types.
+We have ways to write type specifications and generic functions, but
+no nice way to treat them as data or to decouple them from a specific
+platform.
 
 ## Types
 
-Names subject to bikeshedding.
+### Primitive types
+
+Primitive types will be accreted according to need.
+
+We currently support:
 
 - Text
-- Boolean
+
+We expect to eventually support:
+
 - Int32
-- Double
-- Maybe
-- List/Array
-- Sums
-- Records (Purescript-style, with overloadable field names)
+- Int64
+- Bool
+- Bytes
 
-Contentious exclusions for now: bytestrings, proper
-products/tuples, Either, Map, type aliased records, extensible
-records.
+### Compound types
 
-## Syntax mockup
+- Sum types / variants
+- Records with overloadable fields
 
-Wasn't kidding about the MaxML. Suggestions welcome.
+## Syntax
+
+The v1 syntax is Haskell-esque. We can change this down the track if
+anyone develops Strong Syntax Opinions.
 
 ```haskell
--- machinator v1
+-- machinator @ v1
 
 data Foo
   = FooV1 Bar Baz Text
   | FooV2 Integer Double (Maybe Baz)
   | FooV3 [Baz]
 
-data Baz = Baz {
-    name :: Text
-  , age :: Int
+record Baz = {
+    name : Text
+  , age : Int
   }
 
-data Bar = Bar {
-    quuz :: Boolean
+record Bar = Bar {
+    name : Text
+  , quux : Boolean
   }
 ```
 
