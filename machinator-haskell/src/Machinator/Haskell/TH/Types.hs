@@ -1,11 +1,18 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Machinator.Haskell.TH.Types (
+  -- * Interface
     genTypesV1
+  -- * Guts and utilities
+  , genConV1
+  , genRecV1
+  , genRecFieldNameV1
+  , genTypeV1
   ) where
 
 
-import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.Char as Char
+import qualified Data.Text as T
 
 import           Machinator.Core
 import           Machinator.Core.Data.Definition
@@ -16,16 +23,37 @@ import qualified Language.Haskell.TH as TH
 import qualified X.Language.Haskell.TH.Syntax as XTH
 
 
+-- | Generate a TH type declaration from a Machinator 'Definition'.
 genTypesV1 :: Definition -> TH.Dec
-genTypesV1 (Definition (Name n) d) =
+genTypesV1 (Definition nn@(Name n) d) =
   case d of
-    Variant (nt :| nts) ->
-      XTH.data_ (XTH.mkName_ n) [] (fmap (uncurry genConV1) (nt:nts))
+    Variant nts ->
+      XTH.data_ (XTH.mkName_ n) [] (fmap (uncurry genConV1) (toList nts))
+    Record fts ->
+      XTH.data_ (XTH.mkName_ n) [] [genRecV1 nn fts]
 
+-- | Generate a regular variant constructor.
 genConV1 :: Name -> [Type] -> TH.Con
 genConV1 (Name n) ts =
   XTH.normalC_' (XTH.mkName_ n) (fmap genTypeV1 ts)
 
+-- | Generate a record constructor.
+genRecV1 :: Name -> [(Name, Type)] -> TH.Con
+genRecV1 nn@(Name n) fts =
+  XTH.recC_' (XTH.mkName_ n) (fmap (bimap (genRecFieldNameV1 nn) genTypeV1) fts)
+
+-- | The heuristic used to derive Haskell record field names.
+--
+-- For a record named 'FooBar' with a field 'bazQuux', the Haskell
+-- field will be named 'fooBarBazQuux'.
+--
+-- This is a decent enough heuristic with few collisions, but should
+-- perhaps be configurable by the end-user.
+genRecFieldNameV1 :: Name -> Name -> TH.Name
+genRecFieldNameV1 (Name tn) (Name fn) =
+  XTH.mkName_ (T.map Char.toLower (T.take 1 tn) <> T.drop 1 tn <> T.toTitle fn)
+
+-- | Generate a regular type from a Machinator 'Type'.
 genTypeV1 :: Type -> TH.Type
 genTypeV1 ty =
   case ty of

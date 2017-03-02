@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Machinator.Core.Pretty (
     ppDefinitionFile
+  , ppDefinition
   ) where
 
 
@@ -39,6 +40,8 @@ ppDefinition (Definition n ty) =
   case ty of
     Variant cs ->
       ppVariant n cs
+    Record fts ->
+      ppRecord n fts
 
 ppVariant :: Name -> NonEmpty (Name, [Type]) -> Doc a
 ppVariant (Name n) cs =
@@ -52,6 +55,20 @@ ppVariant (Name n) cs =
 ppConstructor :: Name -> [Type] -> Doc a
 ppConstructor n ts =
   WL.hang 2 (ppName n WL.<> foldl' (<+>) WL.empty (fmap ppType ts))
+
+ppRecord :: Name -> [(Name, Type)] -> Doc a
+ppRecord n fts =
+  WL.hang 2
+    (text "record" <+> ppName n <+> text "=" <+> text "{"
+      WL.<$$> foldl'
+                (<+>)
+                WL.empty
+                (WL.punctuate (WL.linebreak WL.<> text ",") (fmap (uncurry ppRecordField) fts))
+      WL.<> text "}")
+
+ppRecordField :: Name -> Type -> Doc a
+ppRecordField n ty =
+  ppName n <+> text ":" <+> ppType ty
 
 ppType :: Type -> Doc a
 ppType t =

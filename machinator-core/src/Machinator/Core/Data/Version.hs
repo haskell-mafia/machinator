@@ -55,6 +55,7 @@ data MachinatorFeature
   = HasStrings
   | HasVariants
   | HasLists
+  | HasRecords
   deriving (Eq, Ord, Enum, Show)
 
 -- | The set of features enabled for a given version.
@@ -66,6 +67,7 @@ versionFeatures mv =
           HasStrings
         , HasVariants
         , HasLists
+        , HasRecords
         ]
 
 -- | Returns true if the given feature is enabled for the given version.

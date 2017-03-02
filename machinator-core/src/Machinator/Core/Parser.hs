@@ -88,7 +88,17 @@ data Foo = Bar String | Baz String
 
 data Bap = Bip Foo
 
-data Foo = Lip String Foo | Nil
+record Quux = {
+    a : Foo
+  , b : Bap
+  , c : Quux
+  }
+
+record Quib = {
+    a : Foo
+  , b : Bap
+  , c : Quib
+  }
 
 -}
 
@@ -99,14 +109,14 @@ parseVersioned file v = do
 
 definition :: MachinatorVersion -> Parser Definition
 definition v =
-  M.choice [
-      variant v
-    ]
+      record v
+  <|> variant v
+
 
 variant :: MachinatorVersion -> Parser Definition
 variant v = do
   hasFeature v HasVariants
-  token TData
+  M.try (token TData)
   x <- ident
   token TEquals
   cs <- sepBy1 (alternative v) (token TChoice)
@@ -117,6 +127,24 @@ alternative v = do
   name <- ident
   ts <- many (types v)
   pure (name, ts)
+
+record :: MachinatorVersion -> Parser Definition
+record v = do
+  hasFeature v HasRecords
+  M.try (token TRecord)
+  x <- ident
+  token TEquals
+  token TLBrace
+  fts <- sepBy (recordField v) (token TComma)
+  token TRBrace
+  pure (Definition x (Record fts))
+
+recordField :: MachinatorVersion -> Parser (Name, Type)
+recordField v = do
+  name <- ident
+  token TTypeSig
+  ty <- types v
+  pure (name, ty)
 
 types :: MachinatorVersion -> Parser Type
 types v = do
@@ -151,10 +179,14 @@ hasFeature :: MachinatorVersion -> MachinatorFeature -> Parser ()
 hasFeature v f =
   if featureEnabled v f then pure () else parseError (FeatureGuard v f)
 
+sepBy :: Parser a -> Parser sep -> Parser [a]
+sepBy m sep =
+  M.try (fmap toList (sepBy1 m sep)) <|> pure []
+
 sepBy1 :: Parser a -> Parser sep -> Parser (NonEmpty a)
 sepBy1 m sep = do
   a <- m
-  bs <- many (sep *> m)
+  bs <- many (M.try sep *> m)
   pure (a :| bs)
 
 ident :: Parser Name
