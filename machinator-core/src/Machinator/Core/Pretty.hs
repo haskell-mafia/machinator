@@ -3,6 +3,8 @@
 module Machinator.Core.Pretty (
     ppDefinitionFile
   , ppDefinition
+  , ppDefinitionAnnotated
+  , SyntaxAnnotation (..)
   ) where
 
 
@@ -24,65 +26,102 @@ ppDefinitionFile :: Versioned DefinitionFile -> Text
 ppDefinitionFile (Versioned v df) =
   prettyUndecorated (ppDefinitionFile' v df)
 
+ppDefinition :: Definition -> Text
+ppDefinition =
+  prettyUndecorated . ppDefinition'
+
+data SyntaxAnnotation =
+    Punctuation
+  | Keyword
+  | TypeDefinition Text
+  | TypeUsage Text
+  | ConstructorDefinition Text
+  | FieldDefinition Text Text
+  | VersionMarker
+  deriving (Eq, Ord, Show)
+
+ppDefinitionAnnotated ::
+     (SyntaxAnnotation -> Text)
+  -> (SyntaxAnnotation -> Text)
+  -> Definition
+  -> Text
+ppDefinitionAnnotated start end =
+  prettyDecorated start end . ppDefinition'
+
 -- -----------------------------------------------------------------------------
 
-ppDefinitionFile' :: MachinatorVersion -> DefinitionFile -> Doc a
+ppDefinitionFile' :: MachinatorVersion -> DefinitionFile -> Doc SyntaxAnnotation
 ppDefinitionFile' v (DefinitionFile _ defs) =
-       ppVersion v
-  WL.<$$> cat (WL.punctuate (WL.linebreak WL.<> WL.linebreak) (fmap ppDefinition defs))
+          ppVersion v
+  WL.<$$> cat (WL.punctuate (WL.linebreak WL.<> WL.linebreak) (fmap ppDefinition' defs))
 
-ppVersion :: MachinatorVersion -> Doc a
+ppVersion :: MachinatorVersion -> Doc SyntaxAnnotation
 ppVersion v =
-  text "-- machinator @ v" WL.<> WL.int (versionToNumber v)
+  WL.annotate VersionMarker $
+    text "-- machinator @ v" WL.<> WL.int (versionToNumber v)
 
-ppDefinition :: Definition -> Doc a
-ppDefinition (Definition n ty) =
+ppDefinition' :: Definition -> Doc SyntaxAnnotation
+ppDefinition' (Definition n ty) =
   case ty of
     Variant cs ->
       ppVariant n cs
     Record fts ->
       ppRecord n fts
 
-ppVariant :: Name -> NonEmpty (Name, [Type]) -> Doc a
+ppVariant :: Name -> NonEmpty (Name, [Type]) -> Doc SyntaxAnnotation
 ppVariant (Name n) cs =
-  WL.hang 2
-    (text "data" <+> text n WL.<$$> text "="
-      WL.<> (foldl'
-              (<+>)
-              WL.empty
-              (WL.punctuate (WL.linebreak WL.<> text "|") (NE.toList (fmap (uncurry ppConstructor) cs)))))
+  WL.hang
+    2
+    (keyword "data" <+>
+     WL.annotate (TypeDefinition n) (text n) WL.<$$>
+     punctuation "=" WL.<>
+     (foldl'
+        (<+>)
+        WL.empty
+        (WL.punctuate
+           (WL.linebreak WL.<> punctuation "|")
+           (NE.toList (fmap (uncurry ppConstructor) cs)))))
 
-ppConstructor :: Name -> [Type] -> Doc a
-ppConstructor n ts =
-  WL.hang 2 (ppName n WL.<> foldl' (<+>) WL.empty (fmap ppType ts))
+ppConstructor :: Name -> [Type] -> Doc SyntaxAnnotation
+ppConstructor nn@(Name n) ts =
+  WL.hang
+    2
+    (WL.annotate (ConstructorDefinition n) (ppName nn) WL.<>
+     foldl' (<+>) WL.empty (fmap ppType ts))
 
-ppRecord :: Name -> [(Name, Type)] -> Doc a
-ppRecord n fts =
-  WL.hang 2
-    (text "record" <+> ppName n <+> text "=" <+> text "{"
-      WL.<$$> foldl'
-                (<+>)
-                WL.empty
-                (WL.punctuate (WL.linebreak WL.<> text ",") (fmap (uncurry ppRecordField) fts))
-      WL.<> text "}")
+ppRecord :: Name -> [(Name, Type)] -> Doc SyntaxAnnotation
+ppRecord nn@(Name n) fts =
+  WL.hang
+    2
+    (keyword "record" <+>
+     WL.annotate (TypeDefinition n) (ppName nn) <+>
+     punctuation "=" <+>
+     punctuation "{" WL.<$$>
+     foldl'
+       (<+>)
+       (text " ")
+       (WL.punctuate
+          (WL.linebreak WL.<> punctuation ",")
+          (fmap (uncurry (ppRecordField nn)) fts)) WL.<$$>
+     punctuation "}")
 
-ppRecordField :: Name -> Type -> Doc a
-ppRecordField n ty =
-  ppName n <+> text ":" <+> ppType ty
+ppRecordField :: Name -> Name -> Type -> Doc SyntaxAnnotation
+ppRecordField (Name tn) nn@(Name n) ty =
+  WL.annotate (FieldDefinition tn n) (ppName nn) <+> punctuation ":" <+> ppType ty
 
-ppType :: Type -> Doc a
+ppType :: Type -> Doc SyntaxAnnotation
 ppType t =
   case t of
-    Variable n ->
-      ppName n
+    Variable nn@(Name n) ->
+      WL.annotate (TypeUsage n) (ppName nn)
     GroundT g ->
       ppGroundType g
     ListT lt ->
-      "(List " <+> ppType lt <+> ")"
+      punctuation "(" WL.<> keyword "List" <+> ppType lt WL.<> punctuation ")"
 
-ppGroundType :: Ground -> Doc a
+ppGroundType :: Ground -> Doc SyntaxAnnotation
 ppGroundType =
-  ppName . groundToName
+  keyword . unName . groundToName
 
 ppName :: Name -> Doc a
 ppName =
@@ -101,6 +140,14 @@ pretty =
 cat :: [Doc a] -> Doc a
 cat =
   foldl' (WL.<>) WL.empty
+
+punctuation :: Text -> Doc SyntaxAnnotation
+punctuation =
+  WL.annotate Punctuation . text
+
+keyword :: Text -> Doc SyntaxAnnotation
+keyword =
+  WL.annotate Keyword . text
 
 prettyDecorated :: (a -> Text) -> (a -> Text) -> Doc a -> Text
 prettyDecorated start end =
