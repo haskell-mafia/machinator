@@ -33,6 +33,7 @@ ppDefinition =
 data SyntaxAnnotation =
     Punctuation
   | Keyword
+  | Primitive
   | TypeDefinition Text
   | TypeUsage Text
   | ConstructorDefinition Text
@@ -117,11 +118,11 @@ ppType t =
     GroundT g ->
       ppGroundType g
     ListT lt ->
-      punctuation "(" WL.<> keyword "List" <+> ppType lt WL.<> punctuation ")"
+      punctuation "(" WL.<> primitive "List" <+> ppType lt WL.<> punctuation ")"
 
 ppGroundType :: Ground -> Doc SyntaxAnnotation
 ppGroundType =
-  keyword . unName . groundToName
+  primitive . unName . groundToName
 
 ppName :: Name -> Doc a
 ppName =
@@ -148,6 +149,10 @@ punctuation =
 keyword :: Text -> Doc SyntaxAnnotation
 keyword =
   WL.annotate Keyword . text
+
+primitive :: Text -> Doc SyntaxAnnotation
+primitive =
+  WL.annotate Primitive . text
 
 prettyDecorated :: (a -> Text) -> (a -> Text) -> Doc a -> Text
 prettyDecorated start end =
