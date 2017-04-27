@@ -66,8 +66,8 @@ token =
 token' :: Parser (Positioned Token)
 token' =
   withPosition $ M.choice [
-      string "data" *> pure TData
-    , string "record" *> pure TRecord
+      M.try $ string (T.unpack dataKeyword) >> M.spaceChar >> pure TData
+    , M.try $ string (T.unpack recordKeyword) >> M.spaceChar >> pure TRecord
     , string "=" *> pure TEquals
     , string "|" *> pure TChoice
     , string "(" *> pure TLParen

@@ -141,7 +141,7 @@ record v = do
 
 recordField :: MachinatorVersion -> Parser (Name, Type)
 recordField v = do
-  name <- ident
+  name <- ident <|> dataAsIdent <|> recordAsIdent
   token TTypeSig
   ty <- types v
   pure (name, ty)
@@ -193,6 +193,16 @@ ident :: Parser Name
 ident = do
   TIdent x <- satisfy (\case TIdent _ -> True; _ -> False)
   pure (Name x)
+
+recordAsIdent :: Parser Name
+recordAsIdent = do
+  TRecord <- satisfy (\case TRecord -> True; _ -> False)
+  pure (Name MT.recordKeyword)
+
+dataAsIdent :: Parser Name
+dataAsIdent = do
+  TData <- satisfy (\case TData -> True; _ -> False)
+  pure (Name MT.dataKeyword)
 
 token :: Token -> Parser ()
 token t =
