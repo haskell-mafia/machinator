@@ -18,6 +18,7 @@ import           Disorder.Jack
 
 import           Machinator.Core.Data.Definition
 import           Machinator.Core.Data.Version
+import           Machinator.Core.Data.Token
 
 import           P
 
@@ -114,5 +115,6 @@ genFieldName =
   oneOf [
       fmap Name (elements boats)
     , fmap Name (elements waters)
+    , fmap Name (elements [dataKeyword, recordKeyword])
     , (Name . T.pack) <$> vectorOf 8 (arbitrary `suchThat` Char.isAsciiLower)
     ]

@@ -2,6 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Machinator.Core.Data.Token (
     Token (..)
+  , recordKeyword
+  , dataKeyword
   ) where
 
 
@@ -21,3 +23,12 @@ data Token
   | TTypeSig
   | TRecord
   deriving (Eq, Ord, Show)
+
+
+recordKeyword :: Text
+recordKeyword =
+  "record"
+
+dataKeyword :: Text
+dataKeyword =
+  "data"
