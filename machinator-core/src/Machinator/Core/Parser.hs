@@ -104,14 +104,19 @@ record Quib = {
 
 parseVersioned :: FilePath -> MachinatorVersion -> Parser (Versioned DefinitionFile)
 parseVersioned file v = do
-  ds <- many (definition v)
-  pure (Versioned v (DefinitionFile file ds))
+  ds <- many $
+    (Just <$> definition v) <|> ((const Nothing) <$> comment v)
+  pure (Versioned v (DefinitionFile file (catMaybes ds)))
 
 definition :: MachinatorVersion -> Parser Definition
 definition v =
       record v
   <|> variant v
 
+comment :: MachinatorVersion -> Parser ()
+comment v = do
+  hasFeature v HasComments
+  token TComment >> pure ()
 
 variant :: MachinatorVersion -> Parser Definition
 variant v = do
