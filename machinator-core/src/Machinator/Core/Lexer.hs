@@ -34,7 +34,7 @@ renderLexError e =
 
 lexVersioned :: FilePath -> Text -> Either LexError (Versioned [Positioned Token])
 lexVersioned file t =
-  first (LexError . T.pack . M.parseErrorPretty) (M.runParser lexVersioned' file t)
+  first (LexError . T.pack . M.parseErrorPretty) (M.runParser (lexVersioned' <* M.eof) file t)
 
 
 -- -----------------------------------------------------------------------------
