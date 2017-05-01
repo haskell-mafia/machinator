@@ -72,9 +72,8 @@ token' =
     , M.try $
         string (T.unpack recordKeyword) >> M.spaceChar
           >> pure TRecord
-    , M.try $
-        M.string "{-" >> M.manyTill M.anyChar (string "-}")
-          >> pure TComment
+    , ML.skipBlockCommentNested "{-" "-}"
+        >> pure TComment
     , M.try $
         M.string "--" >> M.manyTill M.anyChar M.eol
           >> pure TComment
