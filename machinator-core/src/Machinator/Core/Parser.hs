@@ -162,6 +162,8 @@ types' v = do
           case t of
             StringT ->
               hasFeature v HasStrings *> pure (GroundT t)
+            BoolT ->
+              hasFeature v HasBools *> pure (GroundT t)
         Nothing ->
           pure (Variable x)
 

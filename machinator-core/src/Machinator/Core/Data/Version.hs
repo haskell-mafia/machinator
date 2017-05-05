@@ -56,6 +56,7 @@ data MachinatorFeature
   | HasVariants
   | HasLists
   | HasRecords
+  | HasBools
   deriving (Eq, Ord, Enum, Show)
 
 -- | The set of features enabled for a given version.
@@ -68,6 +69,7 @@ versionFeatures mv =
         , HasVariants
         , HasLists
         , HasRecords
+        , HasBools
         ]
 
 -- | Returns true if the given feature is enabled for the given version.
