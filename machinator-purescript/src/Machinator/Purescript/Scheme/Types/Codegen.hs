@@ -37,7 +37,9 @@ genTypeV1 ty =
     Variable (Name n) ->
       text n
     GroundT g ->
-      text (unName (groundToName g))
+      case g of
+        StringT ->
+          text "String"
     ListT t2 ->
       WL.parens (string "Array" <+> genTypeV1 t2)
 
