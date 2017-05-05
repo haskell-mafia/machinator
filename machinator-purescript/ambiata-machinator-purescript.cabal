@@ -4,11 +4,11 @@ license:               AllRightsReserved
 author:                Ambiata <info@ambiata.com>
 maintainer:            Ambiata <info@ambiata.com>
 copyright:             (c) 2017 Ambiata.
-synopsis:              ambiata-machinator-haskell
+synopsis:              ambiata-machinator-purescript
 category:              System
 cabal-version:         >= 1.8
 build-type:            Simple
-description:           ambiata-machinator-haskell
+description:           ambiata-machinator-purescript
 
 library
   build-depends:
@@ -21,6 +21,7 @@ library
                      , semigroups                      == 0.18.*
                      , text                            == 1.2.*
                      , transformers                    >= 0.4        && < 0.7
+                     , wl-pprint-annotated             == 0.1.*
 
   ghc-options:
                        -Wall
@@ -32,6 +33,7 @@ library
                        Machinator.Purescript
                        Machinator.Purescript.Data.Types
                        Machinator.Purescript.Scheme.Types
+                       Machinator.Purescript.Scheme.Types.Codegen
 
 test-suite test
   type:                exitcode-stdio-1.0
