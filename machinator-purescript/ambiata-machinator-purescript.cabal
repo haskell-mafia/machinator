@@ -29,8 +29,6 @@ library
                        src
 
   exposed-modules:
-                       Paths_ambiata_machinator_haskell
-
                        Machinator.Purescript
                        Machinator.Purescript.Data.Types
                        Machinator.Purescript.Scheme.Types

@@ -31,8 +31,6 @@ library
                        src
 
   exposed-modules:
-                       Paths_ambiata_machinator_haskell
-
                        Machinator.Haskell
                        Machinator.Haskell.Data.Types
                        Machinator.Haskell.Scheme.Types

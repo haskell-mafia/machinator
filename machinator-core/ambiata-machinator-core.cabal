@@ -29,8 +29,6 @@ library
                        src
 
   exposed-modules:
-                       Paths_ambiata_machinator_core
-
                        Machinator.Core
 
                        Machinator.Core.Data.Definition
