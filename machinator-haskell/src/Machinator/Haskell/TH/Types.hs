@@ -63,5 +63,7 @@ genTypeV1 ty =
       case g of
         StringT ->
           XTH.conT (XTH.mkName_ "Text")
+        BoolT ->
+          XTH.conT (XTH.mkName_ "Bool")
     ListT t2 ->
       XTH.listT_ (genTypeV1 t2)

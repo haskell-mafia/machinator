@@ -66,6 +66,7 @@ data Type
 -- | Ground types, e.g. platform primitives.
 data Ground
   = StringT
+  | BoolT
   deriving (Eq, Ord, Show)
 
 -- | Obtain the stringy form for a ground type.
@@ -74,6 +75,8 @@ groundToName g =
   case g of
     StringT ->
       Name "String"
+    BoolT ->
+      Name "Bool"
 
 -- | Obtain the ground type for a stringy name.
 groundFromName :: Alternative f => Name -> f Ground
@@ -81,6 +84,8 @@ groundFromName n =
   case unName n of
     "String" ->
       pure StringT
+    "Bool" ->
+      pure BoolT
     _ ->
       empty
 

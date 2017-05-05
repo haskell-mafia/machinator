@@ -40,6 +40,8 @@ genTypeV1 ty =
       case g of
         StringT ->
           text "String"
+        BoolT ->
+          text "Boolean"
     ListT t2 ->
       WL.parens (string "Array" <+> genTypeV1 t2)
 
