@@ -18,6 +18,10 @@ prop_tripping_v1 =
   gamble genDefinitionFileV1 $ \vdf ->
     tripping ppDefinitionFile (parseDefinitionFile "Test.Machinator.Core.Arbitrary") vdf
 
+prop_tripping_v2 =
+  gamble genDefinitionFileV2 $ \vdf ->
+    tripping ppDefinitionFile (parseDefinitionFile "Test.Machinator.Core.Arbitrary") vdf
+
 
 return []
 tests = $disorderCheckEnvAll TestRunNormal

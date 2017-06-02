@@ -43,7 +43,9 @@ lexVersioned file t =
 lexVersioned' :: Parser (Versioned [Positioned Token])
 lexVersioned' = do
   mv <- version
-  ts <- many token
+  comment mv
+  ts <- many (token mv)
+  space
   pure (Versioned mv ts)
 
 version :: Parser MachinatorVersion
@@ -59,9 +61,9 @@ version = do
       -- TODO custom error component for bad version number?
       fail ("Unknown version number " <> show v <> " - expected 1")
 
-token :: Parser (Positioned Token)
-token =
-  token' <* space
+token :: MachinatorVersion -> Parser (Positioned Token)
+token v =
+  token' <* space <* comment v
 
 token' :: Parser (Positioned Token)
 token' =
@@ -72,12 +74,6 @@ token' =
     , M.try $
         string (T.unpack recordKeyword) >> M.spaceChar
           >> pure TRecord
-    , M.try $
-        ML.skipBlockCommentNested "{-" "-}"
-          >> pure TComment
-    , M.try $
-        M.string "--" >> M.manyTill M.anyChar M.eol
-          >> pure TComment
     , string "=" *> pure TEquals
     , string "|" *> pure TChoice
     , string "(" *> pure TLParen
@@ -88,6 +84,15 @@ token' =
     , string "," *> pure TComma
     , ident
     ]
+
+comment :: MachinatorVersion -> Parser ()
+comment v =
+  when (featureEnabled v HasComments) $
+    void . many $ M.choice [
+        ML.skipBlockCommentNested "{-" "-}"
+      , ML.skipLineComment "--"
+      , void M.spaceChar
+      ]
 
 ident :: Parser Token
 ident = do

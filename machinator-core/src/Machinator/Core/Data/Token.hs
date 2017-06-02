@@ -22,7 +22,6 @@ data Token
   | TComma
   | TTypeSig
   | TRecord
-  | TComment
   deriving (Eq, Ord, Show)
 
 
