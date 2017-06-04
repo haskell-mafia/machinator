@@ -38,6 +38,11 @@ genDefinitionFilesV1 =
         (mempty, mempty, mempty)
         (fmap (T.unpack . unName) (toList fns)))
 
+genDefinitionFileV2 :: Jack (Versioned DefinitionFile)
+genDefinitionFileV2 =
+  -- V2 is the same as V1 with comments, which doesn't change the parser
+  genDefinitionFileV1
+
 genDefinitionFileV1 :: Jack (Versioned DefinitionFile)
 genDefinitionFileV1 =
   sized $ \n ->

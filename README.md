@@ -49,6 +49,8 @@ We expect to eventually support:
 
 ## Syntax
 
+### V1
+
 The v1 syntax is Haskell-esque. We can change this down the track if
 anyone develops Strong Syntax Opinions.
 
@@ -69,6 +71,19 @@ record Bar = Bar {
     name : Text
   , quux : Boolean
   }
+
+### V2
+
+`v2` introduced Haskell-style comments:
+
+```haskell
+data Foo = -- Ignore this bit
+  {- Can also
+    put multi line comments
+      -}
+  Foo Bar
+```
+
 ```
 
 Backends will be functions over such declarations. You should be able
