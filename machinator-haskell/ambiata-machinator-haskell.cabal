@@ -20,7 +20,7 @@ library
                      , containers
                      , filepath                        == 1.4.*
                      , semigroups                      == 0.18.*
-                     , template-haskell                == 2.10.*
+                     , template-haskell                >= 2.10       && < 2.12
                      , text                            == 1.2.*
                      , transformers                    >= 0.4        && < 0.7
 
