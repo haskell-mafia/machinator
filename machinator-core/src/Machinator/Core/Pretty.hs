@@ -74,11 +74,11 @@ ppVariant (Name n) cs =
   WL.hang
     2
     (keyword "data" <+>
-     WL.annotate (TypeDefinition n) (text n) WL.<$$>
-     punctuation "=" WL.<>
+     WL.annotate (TypeDefinition n) (text n) <+>
+     punctuation "=" WL.<$$>
      (foldl'
         (<+>)
-        WL.empty
+        (text " ")
         (WL.punctuate
            (WL.linebreak WL.<> punctuation "|")
            (NE.toList (fmap (uncurry ppConstructor) cs)))))
