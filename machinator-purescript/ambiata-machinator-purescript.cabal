@@ -1,6 +1,6 @@
 name:                  ambiata-machinator-purescript
 version:               1.0.0
-license:               AllRightsReserved
+license:               BSD3
 author:                Ambiata <info@ambiata.com>
 maintainer:            Ambiata <info@ambiata.com>
 copyright:             (c) 2017 Ambiata.
