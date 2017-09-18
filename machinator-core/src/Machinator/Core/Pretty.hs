@@ -74,11 +74,11 @@ ppVariant (Name n) cs =
   WL.hang
     2
     (keyword "data" <+>
-     WL.annotate (TypeDefinition n) (text n) WL.<$$>
-     punctuation "=" WL.<>
+     WL.annotate (TypeDefinition n) (text n) <+>
+     punctuation "=" WL.<$$>
      (foldl'
         (<+>)
-        WL.empty
+        (text " ")
         (WL.punctuate
            (WL.linebreak WL.<> punctuation "|")
            (NE.toList (fmap (uncurry ppConstructor) cs)))))
@@ -88,7 +88,7 @@ ppConstructor nn@(Name n) ts =
   WL.hang
     2
     (WL.annotate (ConstructorDefinition n) (ppName nn) WL.<>
-     foldl' (<+>) WL.empty (fmap ppType ts))
+     foldl' (<+>) WL.empty (fmap (ppType 11) ts))
 
 ppRecord :: Name -> [(Name, Type)] -> Doc SyntaxAnnotation
 ppRecord nn@(Name n) fts =
@@ -108,17 +108,20 @@ ppRecord nn@(Name n) fts =
 
 ppRecordField :: Name -> Name -> Type -> Doc SyntaxAnnotation
 ppRecordField (Name tn) nn@(Name n) ty =
-  WL.annotate (FieldDefinition tn n) (ppName nn) <+> punctuation ":" <+> ppType ty
+  WL.annotate (FieldDefinition tn n) (ppName nn) <+> punctuation ":" <+> ppType 0 ty
 
-ppType :: Type -> Doc SyntaxAnnotation
-ppType t =
+ppType :: Int -> Type -> Doc SyntaxAnnotation
+ppType p t =
   case t of
     Variable nn@(Name n) ->
       WL.annotate (TypeUsage n) (ppName nn)
     GroundT g ->
       ppGroundType g
     ListT lt ->
-      punctuation "(" WL.<> primitive "List" <+> ppType lt WL.<> punctuation ")"
+      if p > 10 then
+        punctuation "(" WL.<> primitive "List" <+> ppType 11 lt WL.<> punctuation ")"
+      else
+        primitive "List" <+> ppType 11 lt
 
 ppGroundType :: Ground -> Doc SyntaxAnnotation
 ppGroundType =
