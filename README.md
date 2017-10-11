@@ -71,6 +71,7 @@ record Bar = Bar {
     name : Text
   , quux : Boolean
   }
+```
 
 ### V2
 
@@ -82,8 +83,6 @@ data Foo = -- Ignore this bit
     put multi line comments
       -}
   Foo Bar
-```
-
 ```
 
 Backends will be functions over such declarations. You should be able
