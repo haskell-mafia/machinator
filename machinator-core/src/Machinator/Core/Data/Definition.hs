@@ -32,15 +32,16 @@ import           System.IO  (FilePath)
 
 
 -- | A set of type definitions from a given file.
-data DefinitionFile
-  = DefinitionFile FilePath [Definition]
-  deriving (Eq, Ord, Show)
+data DefinitionFile a
+  = DefinitionFile FilePath [Definition a]
+  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
 
 -- | A single data definition.
-data Definition = Definition {
+data Definition a = Definition {
      defName :: Name
-   , defType :: DataType
-   } deriving (Eq, Ord, Show)
+   , defType :: DataType a
+   , defAnnotation :: a
+   } deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
 
 -- | The module graph.
 -- Maps each file to the other files it depends on.
@@ -90,20 +91,20 @@ groundFromName n =
       empty
 
 -- | Declarable datatypes, e.g. sums or records.
-data DataType
-  = Variant (NonEmpty (Name, [Type]))
-  | Record [(Name, Type)]
-  deriving (Eq, Ord, Show)
+data DataType a
+  = Variant (NonEmpty (Name, [Type])) a
+  | Record [(Name, Type)] a
+  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
 
 -- -----------------------------------------------------------------------------
 
-free :: DataType -> Set Name
+free :: DataType a -> Set Name
 free d =
   case d of
-    Variant nts ->
+    Variant nts _a ->
       fold . with nts $ \(_, ts) ->
         S.fromList . catMaybes . with ts $ freeInType
-    Record fts ->
+    Record fts _a ->
       S.fromList . catMaybes . with fts $ \(_, t) -> (freeInType t)
 
 freeInType :: Type -> Maybe Name
