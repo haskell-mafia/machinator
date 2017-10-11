@@ -22,11 +22,11 @@ import           Text.PrettyPrint.Annotated.Leijen (Doc, (<+>))
 import qualified Text.PrettyPrint.Annotated.Leijen as WL
 
 
-ppDefinitionFile :: Versioned DefinitionFile -> Text
+ppDefinitionFile :: Versioned (DefinitionFile a) -> Text
 ppDefinitionFile (Versioned v df) =
   prettyUndecorated (ppDefinitionFile' v df)
 
-ppDefinition :: Definition -> Text
+ppDefinition :: Definition a -> Text
 ppDefinition =
   prettyUndecorated . ppDefinition'
 
@@ -44,14 +44,14 @@ data SyntaxAnnotation =
 ppDefinitionAnnotated ::
      (SyntaxAnnotation -> Text)
   -> (SyntaxAnnotation -> Text)
-  -> Definition
+  -> Definition a
   -> Text
 ppDefinitionAnnotated start end =
   prettyDecorated start end . ppDefinition'
 
 -- -----------------------------------------------------------------------------
 
-ppDefinitionFile' :: MachinatorVersion -> DefinitionFile -> Doc SyntaxAnnotation
+ppDefinitionFile' :: MachinatorVersion -> DefinitionFile a -> Doc SyntaxAnnotation
 ppDefinitionFile' v (DefinitionFile _ defs) =
           ppVersion v
   WL.<$$> cat (WL.punctuate (WL.linebreak WL.<> WL.linebreak) (fmap ppDefinition' defs))
@@ -61,12 +61,12 @@ ppVersion v =
   WL.annotate VersionMarker $
     text "-- machinator @ v" WL.<> WL.int (versionToNumber v)
 
-ppDefinition' :: Definition -> Doc SyntaxAnnotation
-ppDefinition' (Definition n ty) =
+ppDefinition' :: Definition a -> Doc SyntaxAnnotation
+ppDefinition' (Definition n ty _a) =
   case ty of
-    Variant cs ->
+    Variant cs _a ->
       ppVariant n cs
-    Record fts ->
+    Record fts _a ->
       ppRecord n fts
 
 ppVariant :: Name -> NonEmpty (Name, [Type]) -> Doc SyntaxAnnotation

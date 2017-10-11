@@ -20,7 +20,7 @@ import           System.IO (FilePath)
 
 -- | Figures out the file graph
 -- i.e. for each file, which other files does it depend on?
-buildFileGraph :: [DefinitionFile] -> DefinitionFileGraph
+buildFileGraph :: [DefinitionFile a] -> DefinitionFileGraph
 buildFileGraph fs =
   let
     binds :: Map FilePath [Name]

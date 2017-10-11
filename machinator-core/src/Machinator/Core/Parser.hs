@@ -38,7 +38,7 @@ renderParseError e =
 -- | Pure parser for definition files.
 --
 -- The 'FilePath' is for error reporting.
-parseDefinitionFile :: FilePath -> Versioned [Positioned Token] -> Either ParseError (Versioned DefinitionFile)
+parseDefinitionFile :: FilePath -> Versioned [Positioned Token] -> Either ParseError (Versioned (DefinitionFile Range))
 parseDefinitionFile file (Versioned v ts) =
   first (ParseError . T.pack . show) (M.runParser (parseVersioned file v <* M.eof) file (TokenStream ts))
 
@@ -102,25 +102,27 @@ record Quib = {
 
 -}
 
-parseVersioned :: FilePath -> MachinatorVersion -> Parser (Versioned DefinitionFile)
+parseVersioned :: FilePath -> MachinatorVersion -> Parser (Versioned (DefinitionFile Range))
 parseVersioned file v = do
   ds <- many (definition v)
   pure (Versioned v (DefinitionFile file ds))
 
-definition :: MachinatorVersion -> Parser Definition
+definition :: MachinatorVersion -> Parser (Definition Range)
 definition v =
       record v
   <|> variant v
 
 
-variant :: MachinatorVersion -> Parser Definition
+variant :: MachinatorVersion -> Parser (Definition Range)
 variant v = do
   hasFeature v HasVariants
-  M.try (token TData)
+  a <- M.try (token' TData)
   x <- ident
   token TEquals
   cs <- sepBy1 (alternative v) (token TChoice)
-  pure (Definition x (Variant cs))
+  -- FIXME before merge, should pull from end of constructors
+  let range = a
+  pure (Definition x (Variant cs range) range)
 
 alternative :: MachinatorVersion -> Parser (Name, [Type])
 alternative v = do
@@ -128,16 +130,17 @@ alternative v = do
   ts <- many (types v)
   pure (name, ts)
 
-record :: MachinatorVersion -> Parser Definition
+record :: MachinatorVersion -> Parser (Definition Range)
 record v = do
   hasFeature v HasRecords
-  M.try (token TRecord)
+  a <- M.try (token' TRecord)
   x <- ident
   token TEquals
   token TLBrace
   fts <- sepBy (recordField v) (token TComma)
   token TRBrace
-  pure (Definition x (Record fts))
+  let range = a
+  pure (Definition x (Record fts range) range)
 
 recordField :: MachinatorVersion -> Parser (Name, Type)
 recordField v = do
@@ -193,29 +196,33 @@ sepBy1 m sep = do
 
 ident :: Parser Name
 ident = do
-  TIdent x <- satisfy (\case TIdent _ -> True; _ -> False)
+  TIdent x :@ _ <- satisfy (\case TIdent _ -> True; _ -> False)
   pure (Name x)
 
 recordAsIdent :: Parser Name
 recordAsIdent = do
-  TRecord <- satisfy (\case TRecord -> True; _ -> False)
+  TRecord :@ _ <- satisfy (\case TRecord -> True; _ -> False)
   pure (Name MT.recordKeyword)
 
 dataAsIdent :: Parser Name
 dataAsIdent = do
-  TData <- satisfy (\case TData -> True; _ -> False)
+  TData :@ _ <- satisfy (\case TData -> True; _ -> False)
   pure (Name MT.dataKeyword)
 
 token :: Token -> Parser ()
 token t =
-  satisfy (== t) *> pure ()
+  void (token' t)
 
-satisfy :: (Token -> Bool) -> Parser Token
+token' :: Token -> Parser Range
+token' t =
+  satisfy (== t) >>= \case (_t :@ r) -> pure r
+
+satisfy :: (Token -> Bool) -> Parser (Positioned Token)
 satisfy f = M.token testToken Nothing
   where
     testToken x@(a :@ _) =
       if f a
-        then Right a
+        then Right x
         else Left (S.singleton (M.Tokens (x:|[])), S.empty, S.empty)
 
 positionPos :: Position -> M.SourcePos

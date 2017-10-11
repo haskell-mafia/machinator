@@ -19,6 +19,7 @@ module Machinator.Core (
 
 
 import           Machinator.Core.Data.Definition (DefinitionFile (..), Definition (..), DefinitionFileGraph (..))
+import           Machinator.Core.Data.Position (Range)
 import           Machinator.Core.Data.Version (MachinatorVersion (..), Versioned (..))
 import           Machinator.Core.Graph (buildFileGraph)
 import qualified Machinator.Core.Lexer as Lexer
@@ -47,6 +48,6 @@ renderMachinatorError me =
 -- | Lex and parse a definition file from a 'Text' value.
 --
 -- The 'FilePath' is for error reporting only.
-parseDefinitionFile :: FilePath -> Text -> Either MachinatorError (Versioned DefinitionFile)
+parseDefinitionFile :: FilePath -> Text -> Either MachinatorError (Versioned (DefinitionFile Range))
 parseDefinitionFile file t =
   first MLexError (Lexer.lexVersioned file t) >>= first MParseError . Parser.parseDefinitionFile file

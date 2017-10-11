@@ -26,7 +26,7 @@ import           P
 -- TODO this should probably branch on version at relevant points,
 -- instead of having separate implementations per version
 
-genDefinitionFilesV1 :: Jack [Versioned DefinitionFile]
+genDefinitionFilesV1 :: Jack [Versioned (DefinitionFile ())]
 genDefinitionFilesV1 =
   sized $ \n -> do
     k <- chooseInt (1, 10)
@@ -38,12 +38,12 @@ genDefinitionFilesV1 =
         (mempty, mempty, mempty)
         (fmap (T.unpack . unName) (toList fns)))
 
-genDefinitionFileV2 :: Jack (Versioned DefinitionFile)
+genDefinitionFileV2 :: Jack (Versioned (DefinitionFile ()))
 genDefinitionFileV2 =
   -- V2 is the same as V1 with comments, which doesn't change the parser
   genDefinitionFileV1
 
-genDefinitionFileV1 :: Jack (Versioned DefinitionFile)
+genDefinitionFileV1 :: Jack (Versioned (DefinitionFile ()))
 genDefinitionFileV1 =
   sized $ \n ->
     fmap
@@ -51,7 +51,7 @@ genDefinitionFileV1 =
         (def, _, _) <- genDefinitionFileV1' n mempty mempty
         pure def
 
-genDefinitionFileV1' :: Int -> Set Name -> Set Name -> Jack ([Definition], Set Name, Set Name)
+genDefinitionFileV1' :: Int -> Set Name -> Set Name -> Jack ([Definition ()], Set Name, Set Name)
 genDefinitionFileV1' n kts kcs = do
   tns <- genFree n genName kts
   let kts' = kts <> tns
@@ -63,28 +63,28 @@ genDefinitionFileV1' n kts kcs = do
       (mempty, kcs)
       (toList tns))
 
-genDefinitionV1' :: Int -> Name -> Set Name -> Set Name -> Jack (Definition, Set Name)
+genDefinitionV1' :: Int -> Name -> Set Name -> Set Name -> Jack (Definition (), Set Name)
 genDefinitionV1' k n knownTypes knownCons =
   oneOf [
       do (v, cons) <- genVariantV1 k (S.insert n knownTypes) knownCons
-         pure (Definition n v, knownCons <> cons)
+         pure (Definition n v (), knownCons <> cons)
     , do v <- genRecordV1 k (S.insert n knownTypes)
-         pure (Definition n v, S.insert n knownCons)
+         pure (Definition n v (), S.insert n knownCons)
     ]
 
-genVariantV1 :: Int -> Set Name -> Set Name -> Jack (DataType, Set Name)
+genVariantV1 :: Int -> Set Name -> Set Name -> Jack (DataType (), Set Name)
 genVariantV1 k knownTypes knownCons = do
   k' <- chooseInt (1, k+1)
   ns <- genFree k' genName (knownTypes <> knownCons)
   cts <- for (toList ns) $ \n -> fmap (n,) (listOfN 0 10 (genTypeV1 knownTypes))
-  pure (Variant (NE.fromList cts), ns <> knownCons)
+  pure (Variant (NE.fromList cts) (), ns <> knownCons)
 
-genRecordV1 :: Int -> Set Name -> Jack DataType
+genRecordV1 :: Int -> Set Name -> Jack (DataType ())
 genRecordV1 k knownTypes = do
   k' <- chooseInt (0, k)
   fns <- toList <$> genFree k' genFieldName mempty
   fts <- for fns $ \fn -> (fn,) <$> genTypeV1 knownTypes
-  pure (Record fts)
+  pure (Record fts ())
 
 genTypeV1 :: Set Name -> Jack Type
 genTypeV1 knownTypes =

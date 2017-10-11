@@ -9,7 +9,7 @@ import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 
 import           Disorder.Core
-import           Disorder.Jack
+import           Disorder.Jack hiding (variant)
 
 import           Machinator.Core.Data.Definition
 import           Machinator.Core.Graph
@@ -26,31 +26,35 @@ prop_filegraph_unit :: Property
 prop_filegraph_unit =
   once (buildFileGraph testDefs === testGraph)
 
-testDefs :: [DefinitionFile]
+testDefs :: [DefinitionFile ()]
 testDefs = [
     DefinitionFile "foo.mcn" [
-        (Definition (Name "Foo") . Variant $
+        (variant (Name "Foo") $
              (Name "Foo", [GroundT StringT, GroundT StringT, Variable (Name "Baz")]) :| [])
-      , (Definition (Name "Bar") . Variant $
+      , (variant (Name "Bar") $
              (Name "BarFoo", [Variable (Name "Foo")])
           :| [ (Name "BarBaz", [Variable (Name "Baz")])
              , (Name "BarFooBaz", [Variable (Name "Foo"), Variable (Name "Baz")])
              ])
-      , (Definition (Name "Baz") . Variant $
+      , (variant (Name "Baz") $
              (Name "Baz", []) :| [])
       ]
   , DefinitionFile "heck.mcn" [
-        (Definition (Name "Heck") . Variant $
+        (variant (Name "Heck") $
           (Name "HeckFooBar", [Variable (Name "Foo"), Variable (Name "Bar")]) :| [])
-      , (Definition (Name "Hell") . Variant $
+      , (variant (Name "Hell") $
           (Name "HellBaz", [Variable (Name "Baz")]) :| [])
       ]
   , DefinitionFile "pel.mcn" [
-        (Definition (Name "Pel") . Variant $
+        (variant (Name "Pel") $
              (Name "Pel", [Variable (Name "Heck"), Variable (Name "Hell")])
           :| [(Name "Pil", [Variable (Name "Foo"), Variable (Name "Bar")])])
       ]
   ]
+
+variant :: Name -> NonEmpty (Name, [Type]) -> Definition ()
+variant n v =
+  Definition n (Variant v ()) ()
 
 testGraph :: DefinitionFileGraph
 testGraph =
