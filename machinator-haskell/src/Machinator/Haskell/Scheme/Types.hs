@@ -28,13 +28,13 @@ import qualified System.FilePath.Posix as FilePath
 import           System.IO (FilePath)
 
 
-types :: HaskellTypesVersion -> [DefinitionFile] -> Either HaskellTypesError [(FilePath, Text)]
+types :: HaskellTypesVersion -> [DefinitionFile a] -> Either HaskellTypesError [(FilePath, Text)]
 types v ds =
   case v of
     HaskellTypesV1 ->
       typesV1 ds
 
-typesV1 :: [DefinitionFile] -> Either HaskellTypesError [(FilePath, Text)]
+typesV1 :: [DefinitionFile a] -> Either HaskellTypesError [(FilePath, Text)]
 typesV1 dfs =
   let DefinitionFileGraph fg = MG.buildFileGraph dfs
       mg = M.mapKeys filePathToModuleName (fmap (S.map filePathToModuleName) fg)
@@ -45,7 +45,7 @@ typesV1 dfs =
 -- -----------------------------------------------------------------------------
 
 -- Extremely shoddy codegen for v0 purposes
-renderModule :: ModuleName -> Map ModuleName (Set ModuleName) -> [Definition] -> Text
+renderModule :: ModuleName -> Map ModuleName (Set ModuleName) -> [Definition a] -> Text
 renderModule mn@(ModuleName n) imports defs =
   T.unlines [
       "{-# LANGUAGE NoImplicitPrelude #-}"

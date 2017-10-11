@@ -21,13 +21,13 @@ import qualified System.FilePath.Posix as FilePath
 import           System.IO (FilePath)
 
 
-types :: PurescriptTypesVersion -> [DefinitionFile] -> Either PurescriptTypesError [(FilePath, Text)]
+types :: PurescriptTypesVersion -> [DefinitionFile a] -> Either PurescriptTypesError [(FilePath, Text)]
 types v ds =
   case v of
     PurescriptTypesV1 ->
       typesV1 ds
 
-typesV1 :: [DefinitionFile] -> Either PurescriptTypesError [(FilePath, Text)]
+typesV1 :: [DefinitionFile a] -> Either PurescriptTypesError [(FilePath, Text)]
 typesV1 dfs =
   let DefinitionFileGraph fg = MG.buildFileGraph dfs
       mg = M.mapKeys filePathToModuleName (fmap (S.map filePathToModuleName) fg)
@@ -37,7 +37,7 @@ typesV1 dfs =
 
 -- -----------------------------------------------------------------------------
 
-renderModule :: ModuleName -> Map ModuleName (Set ModuleName) -> [Definition] -> Text
+renderModule :: ModuleName -> Map ModuleName (Set ModuleName) -> [Definition a] -> Text
 renderModule mn@(ModuleName n) imports defs =
   T.unlines [
       T.unwords ["module", n, "where"]

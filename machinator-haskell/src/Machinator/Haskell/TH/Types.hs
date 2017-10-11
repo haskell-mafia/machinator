@@ -24,12 +24,12 @@ import qualified X.Language.Haskell.TH.Syntax as XTH
 
 
 -- | Generate a TH type declaration from a Machinator 'Definition'.
-genTypesV1 :: Definition -> TH.Dec
-genTypesV1 (Definition nn@(Name n) d) =
+genTypesV1 :: Definition a -> TH.Dec
+genTypesV1 (Definition nn@(Name n) d _a) =
   case d of
-    Variant nts ->
+    Variant nts _a ->
       XTH.data_ (XTH.mkName_ n) [] (fmap (uncurry genConV1) (toList nts))
-    Record fts ->
+    Record fts _a ->
       XTH.data_ (XTH.mkName_ n) [] [genRecV1 nn fts]
 
 -- | Generate a regular variant constructor.

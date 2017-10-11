@@ -20,14 +20,14 @@ import qualified Text.PrettyPrint.Annotated.WL as WL
 
 
 -- | Generates a type declaration for the given definition.
-genTypesV1 :: Definition -> Text
-genTypesV1 (Definition (Name n) dec) =
+genTypesV1 :: Definition a -> Text
+genTypesV1 (Definition (Name n) dec _a) =
   renderText $ case dec of
-    Variant (c1 :| cts) ->
+    Variant (c1 :| cts) _a ->
       WL.hang 2 $
         string "data" <+> text n <##> string "="
           <+> fold (WL.punctuate (WL.hardline <> string "| ") (fmap (uncurry genConstructorV1) (c1:cts)))
-    Record fts ->
+    Record fts _a ->
       WL.hang 2 $
         string "newtype" <+> text n <+> string "=" <+> text n <+> genRecordV1 fts
 
@@ -69,12 +69,12 @@ genRecordV1 fts =
 -- unHello :: Hello -> { foo :: Boolean }
 -- unHello (Hello h) = h
 -- @
-genUnwrapV1 :: Definition -> Maybe Text
-genUnwrapV1 (Definition (Name n) dec) =
+genUnwrapV1 :: Definition a -> Maybe Text
+genUnwrapV1 (Definition (Name n) dec _a) =
   renderText <$> case dec of
-    Variant _ ->
+    Variant _ _a ->
       empty
-    Record fs ->
+    Record fs _a ->
       Just $
              text ("un" <> n) <+> string "::" <+> text n <+> "->" <+> genRecordV1 fs
         <##> text ("un" <> n) <+> WL.parens (text n <+> string "x") <+> string "=" <+> string "x"
