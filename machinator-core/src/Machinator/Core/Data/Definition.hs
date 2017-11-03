@@ -66,6 +66,7 @@ data Type
   = Variable Name
   | GroundT Ground
   | ListT Type
+  | AppT Type Type
   deriving (Eq, Ord, Show, Data, Typeable, Generic)
 
 -- | Ground types, e.g. platform primitives.

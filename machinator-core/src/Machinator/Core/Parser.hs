@@ -165,7 +165,8 @@ types' v = do
             BoolT ->
               hasFeature v HasBools *> pure (GroundT t)
         Nothing ->
-          pure (Variable x)
+              (hasFeature v HasTypeApplication *> (AppT (Variable x) <$> types v))
+          <|> pure (Variable x)
 
 parens :: Parser a -> Parser a
 parens p =

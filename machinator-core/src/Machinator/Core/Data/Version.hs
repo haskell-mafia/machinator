@@ -30,6 +30,7 @@ import           P
 data MachinatorVersion
   = MachinatorV1
   | MachinatorV2
+  | MachinatorV3
   deriving (Eq, Ord, Enum, Show)
 
 versionToNumber :: Integral a => MachinatorVersion -> a
@@ -39,6 +40,8 @@ versionToNumber v =
       1
     MachinatorV2 ->
       2
+    MachinatorV3 ->
+      3
 
 versionFromNumber :: (Alternative f, Integral a) => a -> f MachinatorVersion
 versionFromNumber i =
@@ -47,6 +50,8 @@ versionFromNumber i =
       pure MachinatorV1
     2 ->
       pure MachinatorV2
+    3 ->
+      pure MachinatorV3
     _ ->
       empty
 
@@ -63,6 +68,7 @@ data MachinatorFeature
   | HasRecords
   | HasBools
   | HasComments
+  | HasTypeApplication
   deriving (Eq, Ord, Enum, Show)
 
 -- | The set of features enabled for a given version.
@@ -86,6 +92,17 @@ versionFeatures mv =
         , HasRecords
         , HasBools
         , HasComments
+        ]
+
+    MachinatorV3 ->
+      S.fromList [
+          HasStrings
+        , HasVariants
+        , HasLists
+        , HasRecords
+        , HasBools
+        , HasComments
+        , HasTypeApplication
         ]
 
 
